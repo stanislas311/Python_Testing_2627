@@ -1,21 +1,152 @@
-body { font-family: Arial, Helvetica, sans-serif; background: #f4f6f9; color: #222; margin: 0; }
-.container { max-width: 760px; margin: 30px auto; padding: 0 16px; }
-.card { background: #fff; border-radius: 10px; padding: 16px 22px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0, 0, 0, .12); }
-h1, h2, h3 { margin-top: 0; }
-a { color: #1a5fb4; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@700;800&display=swap');
+
+:root {
+    --bg: #F1F5F9;
+    --card: #FFFFFF;
+    --text: #111827;
+    --text-muted: #475569;
+    --border: #E2E8F0;
+    --field-border: #64748B;
+    --primary: #1D4ED8;
+    --primary-hover: #1E3A8A;
+    --link-visited: #5B21B6;
+    --ok: #15803D;
+    --low: #B45309;
+    --full: #B91C1C;
+    --past: #475569;
+    --success-bg: #DCFCE7;
+    --success-text: #14532D;
+    --warning-bg: #FEF3C7;
+    --warning-text: #78350F;
+    --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --font-title: 'Manrope', 'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-title);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-top: 0;
+}
+
+.container { max-width: 760px; margin: 32px auto; padding: 0 16px; }
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
+}
+
+/* Liens */
+a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+a:visited { color: var(--link-visited); }
+a:hover { color: var(--primary-hover); text-decoration-thickness: 2px; }
+a:focus-visible, .btn:focus-visible, input:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Barre du haut : liens de navigation sans soulignement */
 .topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-.points { display: inline-block; background: #1a5fb4; color: #fff; padding: 3px 12px; border-radius: 20px; font-weight: bold; }
-.messages { list-style: none; padding: 0; margin: 0 0 14px 0; }
-.messages li { padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; background: #fff3cd; border-left: 5px solid #e0a800; }
-.messages li.success { background: #d4edda; border-left-color: #28a745; }
-.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .85rem; color: #fff; margin-left: 6px; }
-.badge-ok { background: #28a745; }
-.badge-low { background: #e0a800; }
-.badge-full { background: #c0392b; }
-.badge-past { background: #6c757d; }
-.btn { display: inline-block; background: #1a5fb4; color: #fff; padding: 8px 14px; border: none; border-radius: 6px; text-decoration: none; cursor: pointer; font-size: 1rem; }
-.btn:hover { background: #154c91; }
-input[type=email], input[type=number] { padding: 8px; border: 1px solid #bbb; border-radius: 6px; font-size: 1rem; }
+.topbar a { text-decoration: none; font-weight: 600; padding: 10px 6px; display: inline-block; }
+.topbar a:visited { color: var(--primary); }
+.topbar a:hover { text-decoration: underline; }
+
+/* Boutons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 20px;
+    background: var(--primary);
+    color: #FFFFFF;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+a.btn, a.btn:visited { color: #FFFFFF; text-decoration: none; }
+.btn:hover, a.btn:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #FFFFFF; }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { background: #94A3B8; border-color: #94A3B8; cursor: not-allowed; }
+.btn-secondary { background: #FFFFFF; color: var(--primary); }
+a.btn-secondary, a.btn-secondary:visited { color: var(--primary); }
+.btn-secondary:hover, a.btn-secondary:hover { background: #EFF6FF; color: var(--primary-hover); border-color: var(--primary-hover); }
+
+/* Champs */
+input[type=email], input[type=number], input[type=text] {
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border: 1px solid var(--field-border);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--text);
+    background: #FFFFFF;
+}
+label { font-weight: 500; }
+
+/* Points */
+.points {
+    display: inline-block;
+    background: var(--primary);
+    color: #FFFFFF;
+    padding: 2px 14px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+/* Messages */
+.messages { list-style: none; padding: 0; margin: 0 0 16px 0; }
+.messages li {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    border-left: 5px solid var(--low);
+    font-weight: 500;
+}
+.messages li.success { background: var(--success-bg); color: var(--success-text); border-left-color: var(--ok); }
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 999px;
+    font-size: .875rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    margin-left: 8px;
+}
+.badge-ok { background: var(--ok); }
+.badge-low { background: var(--low); }
+.badge-full { background: var(--full); }
+.badge-past { background: var(--past); }
+
+/* Tableau */
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
-th { background: #eef2f7; }
+th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; }
+th { background: #EEF2F7; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+    .btn { transition: none; }
+}
