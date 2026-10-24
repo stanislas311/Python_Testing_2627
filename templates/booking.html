@@ -1,17 +1,29 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking for {{competition['name']}} || GUDLFT</title>
+    <title>Booking for {{ competition['name'] }} || GUDLFT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>{{competition['name']}}</h2>
-    Places available: {{competition['numberOfPlaces']}}
-    <form action="/purchasePlaces" method="post">
-        <input type="hidden" name="club" value="{{club['name']}}">
-        <input type="hidden" name="competition" value="{{competition['name']}}">
-        <label for="places">How many places?</label><input type="number" name="places" id=""/>
-        <button type="submit">Book</button>
-    </form>
+<div class="container">
+    {% set maxi = [12, club['points']|int, competition['numberOfPlaces']|int]|min %}
+    <div class="card">
+        <h2>{{ competition['name'] }}</h2>
+        Places available: {{ competition['numberOfPlaces'] }}<br />
+        Vos points : <span class="points">{{ club['points'] }}</span>
+        <form action="{{ url_for('purchasePlaces') }}" method="post">
+            <input type="hidden" name="club" value="{{ club['name'] }}">
+            <input type="hidden" name="competition" value="{{ competition['name'] }}">
+            <p>
+                <label for="places">How many places? (max {{ maxi }})</label>
+                <input type="number" name="places" id="places" min="1" max="{{ maxi }}" required/>
+            </p>
+            <button type="submit" class="btn">Book</button>
+        </form>
+    </div>
+    <p><a href="{{ url_for('showSummary') }}" onclick="history.back(); return false;">Retour</a></p>
+</div>
 </body>
 </html>
