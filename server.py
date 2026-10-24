@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from flask import Flask,render_template,request,redirect,flash,url_for
 
 
@@ -21,6 +22,12 @@ competitions = loadCompetitions()
 clubs = loadClubs()
 MAX_PLACES_PAR_CLUB = 12
 bookings = {}
+
+def is_past(competition):
+    date = datetime.strptime(competition['date'], "%Y-%m-%d %H:%M:%S")
+    return date < datetime.now()
+
+app.jinja_env.globals['is_past'] = is_past
 
 @app.route('/')
 def index():
@@ -47,6 +54,9 @@ def book(competition,club):
     if not foundCompetition:
         flash("Compétition introuvable, veuillez réessayer.")
         return render_template('welcome.html', club=foundClub, competitions=competitions)
+    if is_past(foundCompetition):
+        flash("Cette compétition est terminée, la réservation n'est plus possible.")
+        return render_template('welcome.html', club=foundClub, competitions=competitions)
     return render_template('booking.html',club=foundClub,competition=foundCompetition)
 
 
@@ -54,6 +64,9 @@ def book(competition,club):
 def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
+    if is_past(competition):
+        flash("Cette compétition est terminée, la réservation n'est plus possible.")
+        return render_template('welcome.html', club=club, competitions=competitions)
     try:
         placesRequired = int(request.form.get('places', ''))
     except ValueError:
