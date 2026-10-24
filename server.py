@@ -143,6 +143,38 @@ def mesReservations():
     return render_template('reservations.html', club=club, reservations=reservations, total=total)
 
 
+@app.route('/annulerReservation', methods=['POST'])
+def annulerReservation():
+    club = next((c for c in clubs if c['name'] == request.form.get('club', '')), None)
+    competition = next((c for c in competitions if c['name'] == request.form.get('competition', '')), None)
+    if not club:
+        flash("Club introuvable, veuillez vous reconnecter.")
+        return render_template('index.html')
+    if not competition:
+        flash("Compétition introuvable, veuillez réessayer.")
+        return redirect(url_for('mesReservations', club=club['name']))
+    if is_past(competition):
+        flash("Cette compétition est terminée, l'annulation n'est plus possible.")
+        return redirect(url_for('mesReservations', club=club['name']))
+    try:
+        placesToCancel = int(request.form.get('places', ''))
+    except ValueError:
+        placesToCancel = 0
+    if placesToCancel <= 0:
+        flash("Veuillez entrer un nombre de places valide (au moins 1).")
+        return redirect(url_for('mesReservations', club=club['name']))
+    key = (competition['name'], club['name'])
+    alreadyBooked = bookings.get(key, 0)
+    if placesToCancel > alreadyBooked:
+        flash("Vous ne pouvez pas annuler plus de places que vous n'en avez réservé.")
+        return redirect(url_for('mesReservations', club=club['name']))
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) + placesToCancel
+    club['points'] = int(club['points']) + placesToCancel
+    bookings[key] = alreadyBooked - placesToCancel
+    flash("Annulation effectuée : {} place(s) rendue(s).".format(placesToCancel))
+    return redirect(url_for('mesReservations', club=club['name']))
+
+
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))

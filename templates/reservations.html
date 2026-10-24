@@ -13,8 +13,18 @@
         <div><a href="{{ url_for('points', club=club['name']) }}">Tableau des points</a> | <a href="{{ url_for('logout') }}">Logout</a></div>
     </div>
 
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ 'success' if 'effectuée' in message else '' }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
     <div class="card">
-        <p>Club : <strong>{{ club['name'] }}</strong></p>
+        <p>Club : <strong>{{ club['name'] }}</strong> | Points disponibles : <span class="points">{{ club['points'] }}</span></p>
         {% if reservations %}
         <table>
             <thead>
@@ -22,6 +32,7 @@
                     <th>Compétition</th>
                     <th>Date</th>
                     <th>Places réservées</th>
+                    <th>Annulation</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,6 +41,19 @@
                     <td>{{ r['competition'] }}{% if r['past'] %} <span class="badge badge-past">Terminée</span>{% endif %}</td>
                     <td>{{ r['date'] }}</td>
                     <td>{{ r['places'] }}</td>
+                    <td>
+                        {% if r['past'] %}
+                        <em>Non annulable</em>
+                        {% else %}
+                        <form class="cancel-form" action="{{ url_for('annulerReservation') }}" method="post">
+                            <input type="hidden" name="club" value="{{ club['name'] }}">
+                            <input type="hidden" name="competition" value="{{ r['competition'] }}">
+                            <label for="places-{{ loop.index }}" class="sr-only">Places à annuler pour {{ r['competition'] }}</label>
+                            <input type="number" name="places" id="places-{{ loop.index }}" min="1" max="{{ r['places'] }}" value="{{ r['places'] }}" required>
+                            <button type="submit" class="btn btn-secondary">Annuler</button>
+                        </form>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
