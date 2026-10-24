@@ -27,6 +27,14 @@
         Points available: <span class="points">{{ club['points'] }}</span>
     </div>
 
+    <div class="card">
+        <form action="{{ url_for('rechercher') }}" method="get">
+            <input type="hidden" name="club" value="{{ club['name'] }}">
+            <input type="text" name="q" placeholder="Rechercher une compétition" value="{{ request.args.get('q', '') }}">
+            <button type="submit" class="btn">Rechercher</button>
+            <a href="{{ url_for('rechercher', club=club['name']) }}">Tout afficher</a>
+        </form>
+    </div>
     <h3>Competitions:</h3>
     {% for comp in competitions %}
     <div class="card">

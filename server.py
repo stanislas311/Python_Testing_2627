@@ -97,6 +97,20 @@ def points():
     return render_template('points.html', clubs=clubs)
 
 
+@app.route('/rechercher')
+def rechercher():
+    clubName = request.args.get('club', '')
+    terme = request.args.get('q', '').strip().lower()
+    club = next((c for c in clubs if c['name'] == clubName), None)
+    if not club:
+        flash("Club introuvable, veuillez vous reconnecter.")
+        return render_template('index.html')
+    resultats = [c for c in competitions if terme in c['name'].lower()]
+    if not resultats:
+        flash("Aucune compétition ne correspond à votre recherche.")
+    return render_template('welcome.html', club=club, competitions=resultats)
+
+
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
