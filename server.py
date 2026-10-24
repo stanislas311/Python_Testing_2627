@@ -54,7 +54,13 @@ def book(competition,club):
 def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
+    try:
+        placesRequired = int(request.form.get('places', ''))
+    except ValueError:
+        placesRequired = 0
+    if placesRequired <= 0:
+        flash("Veuillez entrer un nombre de places valide (au moins 1).")
+        return render_template('welcome.html', club=club, competitions=competitions)
     key = (competition['name'], club['name'])
     alreadyBooked = bookings.get(key, 0)
     if placesRequired > int(club['points']):
