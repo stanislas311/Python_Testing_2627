@@ -13,15 +13,17 @@
         <table>
             <thead>
                 <tr>
+                    <th>Rang</th>
                     <th>Club</th>
                     <th>Points disponibles</th>
                 </tr>
             </thead>
             <tbody>
-                {% for club in clubs %}
-                <tr>
-                    <td>{{ club['name'] }}</td>
-                    <td>{{ club['points'] }}</td>
+                {% for row in rows %}
+                <tr class="{{ 'me' if row['name'] == currentClub else '' }}">
+                    <td>{{ row['rank'] }}</td>
+                    <td>{{ row['name'] }}{% if row['name'] == currentClub %} (vous){% endif %}</td>
+                    <td>{{ row['points'] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -94,7 +94,17 @@ def purchasePlaces():
 
 @app.route('/points')
 def points():
-    return render_template('points.html', clubs=clubs)
+    ranking = sorted(clubs, key=lambda c: int(c['points']), reverse=True)
+    rows = []
+    previousPoints = None
+    rank = 0
+    for position, c in enumerate(ranking, start=1):
+        if int(c['points']) != previousPoints:
+            rank = position
+            previousPoints = int(c['points'])
+        rows.append({'rank': rank, 'name': c['name'], 'points': int(c['points'])})
+    currentClub = request.args.get('club', '')
+    return render_template('points.html', rows=rows, currentClub=currentClub)
 
 
 @app.route('/rechercher')

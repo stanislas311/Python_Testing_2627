@@ -150,3 +150,5 @@ th { background: #EEF2F7; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
     .btn { transition: none; }
 }
+
+tr.me td { background: #EFF6FF; font-weight: 600; }

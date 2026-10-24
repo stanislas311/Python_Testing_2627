@@ -10,7 +10,7 @@
 <div class="container">
     <div class="card topbar">
         <h2>Welcome, {{ club['email'] }}</h2>
-        <div><a href="{{ url_for('points') }}">Tableau des points</a> | <a href="{{ url_for('logout') }}">Logout</a></div>
+        <div><a href="{{ url_for('points', club=club['name']) }}">Tableau des points</a> | <a href="{{ url_for('logout') }}">Logout</a></div>
     </div>
 
     {% with messages = get_flashed_messages() %}
