@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes réservations | GUDLFT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <div class="card topbar">
+        <h2>Mes réservations</h2>
+        <div><a href="{{ url_for('points', club=club['name']) }}">Tableau des points</a> | <a href="{{ url_for('logout') }}">Logout</a></div>
+    </div>
+
+    <div class="card">
+        <p>Club : <strong>{{ club['name'] }}</strong></p>
+        {% if reservations %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Compétition</th>
+                    <th>Date</th>
+                    <th>Places réservées</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reservations %}
+                <tr>
+                    <td>{{ r['competition'] }}{% if r['past'] %} <span class="badge badge-past">Terminée</span>{% endif %}</td>
+                    <td>{{ r['date'] }}</td>
+                    <td>{{ r['places'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>Total : <strong>{{ total }}</strong> place(s) réservée(s)</p>
+        {% else %}
+        <p>Aucune réservation pour le moment.</p>
+        {% endif %}
+    </div>
+
+    <form action="{{ url_for('showSummary') }}" method="post">
+        <input type="hidden" name="email" value="{{ club['email'] }}">
+        <button type="submit" class="btn btn-secondary">Retour aux compétitions</button>
+    </form>
+</div>
+</body>
+</html>

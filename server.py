@@ -121,6 +121,28 @@ def rechercher():
     return render_template('welcome.html', club=club, competitions=resultats)
 
 
+@app.route('/mesReservations')
+def mesReservations():
+    clubName = request.args.get('club', '')
+    club = next((c for c in clubs if c['name'] == clubName), None)
+    if not club:
+        flash("Club introuvable, veuillez vous reconnecter.")
+        return render_template('index.html')
+    reservations = []
+    for (competitionName, bookedClub), places in bookings.items():
+        if bookedClub == club['name'] and places > 0:
+            competition = next((c for c in competitions if c['name'] == competitionName), None)
+            if competition:
+                reservations.append({
+                    'competition': competitionName,
+                    'date': competition['date'],
+                    'places': places,
+                    'past': is_past(competition),
+                })
+    total = sum(r['places'] for r in reservations)
+    return render_template('reservations.html', club=club, reservations=reservations, total=total)
+
+
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
