@@ -1,18 +1,19 @@
 import json
 from datetime import datetime
-from flask import Flask,render_template,request,redirect,flash,url_for
+
+from flask import Flask, flash, redirect, render_template, request, url_for
 
 
 def loadClubs():
     with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
+        listOfClubs = json.load(c)['clubs']
+        return listOfClubs
 
 
 def loadCompetitions():
     with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
+        listOfCompetitions = json.load(comps)['competitions']
+        return listOfCompetitions
 
 
 app = Flask(__name__)
@@ -20,76 +21,104 @@ app.secret_key = 'something_special'
 
 competitions = loadCompetitions()
 clubs = loadClubs()
+
 MAX_PLACES_PAR_CLUB = 12
 bookings = {}
+
+MSG_CLUB_INTROUVABLE = "Club introuvable, veuillez vous reconnecter."
+MSG_COMPETITION_INTROUVABLE = "Compétition introuvable, veuillez réessayer."
+MSG_PLACES_INVALIDES = ("Veuillez entrer un nombre de places valide "
+                        "(au moins 1).")
+MSG_RESERVATION_TERMINEE = ("Cette compétition est terminée, "
+                            "la réservation n'est plus possible.")
+MSG_ANNULATION_TERMINEE = ("Cette compétition est terminée, "
+                           "l'annulation n'est plus possible.")
+
 
 def is_past(competition):
     date = datetime.strptime(competition['date'], "%Y-%m-%d %H:%M:%S")
     return date < datetime.now()
 
+
 app.jinja_env.globals['is_past'] = is_past
+
+
+def render_welcome(club, competitionsList=None):
+    if competitionsList is None:
+        competitionsList = competitions
+    return render_template(
+        'welcome.html', club=club, competitions=competitionsList)
+
+
+def refuse(club, message):
+    flash(message)
+    return render_welcome(club)
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/showSummary',methods=['POST'])
+
+@app.route('/showSummary', methods=['POST'])
 def showSummary():
     email = request.form.get('email', '')
     matching = [c for c in clubs if c['email'] == email]
     if not matching:
         flash("Désolé, cet email est inconnu.")
         return render_template('index.html')
-    club = matching[0]
-    return render_template('welcome.html',club=club,competitions=competitions)
+    return render_welcome(matching[0])
 
 
 @app.route('/book/<competition>/<club>')
-def book(competition,club):
+def book(competition, club):
     foundClub = next((c for c in clubs if c['name'] == club), None)
-    foundCompetition = next((c for c in competitions if c['name'] == competition), None)
+    foundCompetition = next(
+        (c for c in competitions if c['name'] == competition), None)
     if not foundClub:
-        flash("Club introuvable, veuillez vous reconnecter.")
+        flash(MSG_CLUB_INTROUVABLE)
         return render_template('index.html')
     if not foundCompetition:
-        flash("Compétition introuvable, veuillez réessayer.")
-        return render_template('welcome.html', club=foundClub, competitions=competitions)
+        return refuse(foundClub, MSG_COMPETITION_INTROUVABLE)
     if is_past(foundCompetition):
-        flash("Cette compétition est terminée, la réservation n'est plus possible.")
-        return render_template('welcome.html', club=foundClub, competitions=competitions)
-    return render_template('booking.html',club=foundClub,competition=foundCompetition)
+        return refuse(foundClub, MSG_RESERVATION_TERMINEE)
+    return render_template(
+        'booking.html', club=foundClub, competition=foundCompetition)
 
 
-@app.route('/purchasePlaces',methods=['POST'])
+@app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    competitionName = request.form['competition']
+    clubName = request.form['club']
+    competition = [c for c in competitions if c['name'] == competitionName][0]
+    club = [c for c in clubs if c['name'] == clubName][0]
     if is_past(competition):
-        flash("Cette compétition est terminée, la réservation n'est plus possible.")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return refuse(club, MSG_RESERVATION_TERMINEE)
     try:
         placesRequired = int(request.form.get('places', ''))
     except ValueError:
         placesRequired = 0
     if placesRequired <= 0:
-        flash("Veuillez entrer un nombre de places valide (au moins 1).")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return refuse(club, MSG_PLACES_INVALIDES)
     key = (competition['name'], club['name'])
     alreadyBooked = bookings.get(key, 0)
     if placesRequired > int(club['points']):
-        flash("Vous n'avez pas assez de points pour cette réservation.")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return refuse(
+            club, "Vous n'avez pas assez de points pour cette réservation.")
     if placesRequired > int(competition['numberOfPlaces']):
-        flash("Il n'y a pas assez de places disponibles pour cette compétition.")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return refuse(
+            club,
+            "Il n'y a pas assez de places disponibles pour cette compétition.")
     if alreadyBooked + placesRequired > MAX_PLACES_PAR_CLUB:
-        flash("Un club ne peut pas réserver plus de 12 places par compétition.")
-        return render_template('welcome.html', club=club, competitions=competitions)
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
-    club['points'] = int(club['points'])-placesRequired
+        return refuse(
+            club,
+            "Un club ne peut pas réserver plus de 12 places par compétition.")
+    competition['numberOfPlaces'] = (
+        int(competition['numberOfPlaces']) - placesRequired)
+    club['points'] = int(club['points']) - placesRequired
     bookings[key] = alreadyBooked + placesRequired
     flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
+    return render_welcome(club)
 
 
 @app.route('/points')
@@ -102,7 +131,8 @@ def points():
         if int(c['points']) != previousPoints:
             rank = position
             previousPoints = int(c['points'])
-        rows.append({'rank': rank, 'name': c['name'], 'points': int(c['points'])})
+        rows.append(
+            {'rank': rank, 'name': c['name'], 'points': int(c['points'])})
     currentClub = request.args.get('club', '')
     return render_template('points.html', rows=rows, currentClub=currentClub)
 
@@ -113,12 +143,12 @@ def rechercher():
     terme = request.args.get('q', '').strip().lower()
     club = next((c for c in clubs if c['name'] == clubName), None)
     if not club:
-        flash("Club introuvable, veuillez vous reconnecter.")
+        flash(MSG_CLUB_INTROUVABLE)
         return render_template('index.html')
     resultats = [c for c in competitions if terme in c['name'].lower()]
     if not resultats:
         flash("Aucune compétition ne correspond à votre recherche.")
-    return render_template('welcome.html', club=club, competitions=resultats)
+    return render_welcome(club, resultats)
 
 
 @app.route('/mesReservations')
@@ -126,12 +156,14 @@ def mesReservations():
     clubName = request.args.get('club', '')
     club = next((c for c in clubs if c['name'] == clubName), None)
     if not club:
-        flash("Club introuvable, veuillez vous reconnecter.")
+        flash(MSG_CLUB_INTROUVABLE)
         return render_template('index.html')
     reservations = []
     for (competitionName, bookedClub), places in bookings.items():
         if bookedClub == club['name'] and places > 0:
-            competition = next((c for c in competitions if c['name'] == competitionName), None)
+            competition = next(
+                (c for c in competitions if c['name'] == competitionName),
+                None)
             if competition:
                 reservations.append({
                     'competition': competitionName,
@@ -140,39 +172,48 @@ def mesReservations():
                     'past': is_past(competition),
                 })
     total = sum(r['places'] for r in reservations)
-    return render_template('reservations.html', club=club, reservations=reservations, total=total)
+    return render_template(
+        'reservations.html', club=club, reservations=reservations,
+        total=total)
 
 
 @app.route('/annulerReservation', methods=['POST'])
 def annulerReservation():
-    club = next((c for c in clubs if c['name'] == request.form.get('club', '')), None)
-    competition = next((c for c in competitions if c['name'] == request.form.get('competition', '')), None)
+    clubName = request.form.get('club', '')
+    competitionName = request.form.get('competition', '')
+    club = next((c for c in clubs if c['name'] == clubName), None)
+    competition = next(
+        (c for c in competitions if c['name'] == competitionName), None)
     if not club:
-        flash("Club introuvable, veuillez vous reconnecter.")
+        flash(MSG_CLUB_INTROUVABLE)
         return render_template('index.html')
+    backToList = url_for('mesReservations', club=club['name'])
     if not competition:
-        flash("Compétition introuvable, veuillez réessayer.")
-        return redirect(url_for('mesReservations', club=club['name']))
+        flash(MSG_COMPETITION_INTROUVABLE)
+        return redirect(backToList)
     if is_past(competition):
-        flash("Cette compétition est terminée, l'annulation n'est plus possible.")
-        return redirect(url_for('mesReservations', club=club['name']))
+        flash(MSG_ANNULATION_TERMINEE)
+        return redirect(backToList)
     try:
         placesToCancel = int(request.form.get('places', ''))
     except ValueError:
         placesToCancel = 0
     if placesToCancel <= 0:
-        flash("Veuillez entrer un nombre de places valide (au moins 1).")
-        return redirect(url_for('mesReservations', club=club['name']))
+        flash(MSG_PLACES_INVALIDES)
+        return redirect(backToList)
     key = (competition['name'], club['name'])
     alreadyBooked = bookings.get(key, 0)
     if placesToCancel > alreadyBooked:
-        flash("Vous ne pouvez pas annuler plus de places que vous n'en avez réservé.")
-        return redirect(url_for('mesReservations', club=club['name']))
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) + placesToCancel
+        flash("Vous ne pouvez pas annuler plus de places "
+              "que vous n'en avez réservé.")
+        return redirect(backToList)
+    competition['numberOfPlaces'] = (
+        int(competition['numberOfPlaces']) + placesToCancel)
     club['points'] = int(club['points']) + placesToCancel
     bookings[key] = alreadyBooked - placesToCancel
-    flash("Annulation effectuée : {} place(s) rendue(s).".format(placesToCancel))
-    return redirect(url_for('mesReservations', club=club['name']))
+    flash("Annulation effectuée : {} place(s) rendue(s).".format(
+        placesToCancel))
+    return redirect(backToList)
 
 
 @app.route('/logout')
