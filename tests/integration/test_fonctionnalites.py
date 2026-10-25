@@ -36,7 +36,10 @@ def test_tableau_des_points_est_public(client):
 
 def test_tableau_trie_par_points_decroissants(client):
     page = texte(client.get('/points'))
-    assert page.index('Simply Lift') < page.index('She Lifts') < page.index('Iron Temple')
+    simply = page.index('Simply Lift')
+    she = page.index('She Lifts')
+    iron = page.index('Iron Temple')
+    assert simply < she < iron
 
 
 def test_tableau_ex_aequo_ont_le_meme_rang(client):
@@ -59,7 +62,8 @@ def test_tableau_sans_club_ne_marque_personne(client):
 # ---------- Recherche de compétitions ----------
 
 def rechercher(client, nomClub, terme):
-    reponse = client.get('/rechercher', query_string={'club': nomClub, 'q': terme})
+    reponse = client.get(
+        '/rechercher', query_string={'club': nomClub, 'q': terme})
     return texte(reponse)
 
 
@@ -101,7 +105,8 @@ def historique(client, nomClub):
 
 
 def test_historique_vide_au_depart(client):
-    assert 'Aucune réservation pour le moment' in historique(client, 'Simply Lift')
+    page = historique(client, 'Simply Lift')
+    assert 'Aucune réservation pour le moment' in page
 
 
 def test_historique_affiche_les_reservations_du_club(client):
@@ -116,7 +121,8 @@ def test_historique_affiche_les_reservations_du_club(client):
 
 def test_historique_ne_montre_pas_les_reservations_des_autres_clubs(client):
     reserver(client, 'Spring Festival', 'Simply Lift', 2)
-    assert 'Aucune réservation pour le moment' in historique(client, 'She Lifts')
+    page = historique(client, 'She Lifts')
+    assert 'Aucune réservation pour le moment' in page
 
 
 def test_historique_club_inconnu(client):
@@ -173,11 +179,13 @@ def test_annulation_refusee_si_saisie_invalide(client, saisie):
 
 
 def test_annulation_club_inconnu(client):
-    assert 'Club introuvable' in annuler(client, 'Spring Festival', 'Inconnu', 1)
+    page = annuler(client, 'Spring Festival', 'Inconnu', 1)
+    assert 'Club introuvable' in page
 
 
 def test_annulation_competition_inconnue(client):
-    assert 'Compétition introuvable' in annuler(client, 'Inconnue', 'Simply Lift', 1)
+    page = annuler(client, 'Inconnue', 'Simply Lift', 1)
+    assert 'Compétition introuvable' in page
 
 
 def test_annulation_libere_la_limite_de_12_places(client):
