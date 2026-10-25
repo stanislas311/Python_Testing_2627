@@ -116,3 +116,35 @@ python -m coverage html
 
 Résultats : **51 tests réussis**, couverture de `server.py` : **100 %** (159 lignes sur 159). Le rapport détaillé se génère dans `htmlcov/index.html`.
 
+## 8. Rapport de performance
+
+Outil : Locust 2.47.0. Le scénario est dans `tests/performance/locustfile.py` : chaque utilisateur simulé charge la liste des compétitions, ouvre le tableau des points et la page de réservation, puis réserve une place et l'annule.
+
+Seuils demandés par les spécifications :
+
+* chargement de la liste des compétitions : moins de 5 secondes ;
+* mise à jour des points (réservation) : moins de 2 secondes.
+
+Commandes (le serveur Flask tourne dans un premier terminal) :
+
+```
+flask --app server run
+locust -f tests/performance/locustfile.py --headless -u 20 -r 5 -t 20s --host http://127.0.0.1:5000 --html rapports/rapport_performance.html --csv rapports/rapport_performance
+```
+
+Conditions : 20 utilisateurs simultanés, 5 nouveaux utilisateurs par seconde, 20 secondes, serveur de développement Flask sur un poste Windows (Python 3.11.9).
+
+Résultats (temps en millisecondes) :
+
+| Requête | Nombre | Moyenne | 95 % | Maximum | Échecs |
+|---|---|---|---|---|---|
+| Liste des compétitions | 132 | 23 | 56 | 185 | 0 |
+| Page de réservation | 69 | 21 | 53 | 169 | 0 |
+| Tableau des points | 73 | 21 | 71 | 99 | 0 |
+| Mise à jour des points (réservation) | 33 | 15 | 30 | 37 | 0 |
+| Mise à jour des points (annulation) | 33 | 34 | 62 | 109 | 0 |
+| **Total** | **340** | **22** | **61** | **185** | **0** |
+
+Conclusion : les deux seuils sont respectés avec une très grande marge (185 ms au maximum pour la liste, 109 ms au maximum pour une mise à jour). Ces mesures portent sur un serveur de développement avec des données en mémoire, donc elles ne remplacent pas un test sur un vrai serveur de production.
+
+Les rapports complets sont dans le dossier `rapports/` (`rapport_performance.html` et les fichiers CSV).
