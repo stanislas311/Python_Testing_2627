@@ -75,7 +75,44 @@ Merci !
     We also like to show how well we're testing, so there's a module called 
     [coverage](https://coverage.readthedocs.io/en/coverage-5.1/) you should add to your project.
    
- 6. Flake8 Report 
-    
+## 6. Flake8 Report
 
+Commande lancée à la racine du projet, environnement virtuel activé :
+
+```
+python -m flake8 server.py tests --count --statistics
+```
+
+Résultat final : **0 erreur, 0 avertissement**.
+
+Avant correction, Flake8 signalait 53 remarques sur `server.py` et sur le fichier de tests :
+
+| Code | Signification | Correction |
+|---|---|---|
+| E231 | espace manquant après une virgule | espaces ajoutés |
+| E111 / E117 | indentation incorrecte | indentation de 4 espaces |
+| E302 / E305 | lignes vides manquantes autour des fonctions | 2 lignes vides |
+| E501 | ligne de plus de 79 caractères | lignes découpées, messages regroupés dans des constantes |
+| W292 | pas de retour à la ligne en fin de fichier | ajouté |
+
+Version utilisée : Flake8 7.4.1 (Python 3.11.9).
+
+## 7. Rapport de tests et de couverture
+
+Les tests sont rangés dans le dossier `tests/` :
+
+* `tests/unit` : chargement des données et fonction `is_past` (4 tests)
+* `tests/integration` : connexion, réservation, règles métier, classement, recherche, historique et annulation, avec les cas normaux (happy paths) et les cas d'erreur (sad paths) (47 tests)
+* `tests/conftest.py` : remet les données à zéro avant chaque test
+
+Commandes :
+
+```
+python -m pytest
+python -m coverage run -m pytest
+python -m coverage report
+python -m coverage html
+```
+
+Résultats : **51 tests réussis**, couverture de `server.py` : **100 %** (159 lignes sur 159). Le rapport détaillé se génère dans `htmlcov/index.html`.
 
