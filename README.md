@@ -117,6 +117,8 @@ python -m coverage html
 
 Résultats : **64 tests réussis** (15 unitaires, 47 d'intégration et 2 fonctionnels), couverture de `server.py` : **100 %** (162 instructions sur 162). Le rapport détaillé se génère dans `htmlcov/index.html`.
 
+Le guide conseille environ deux fois plus de tests unitaires que de tests d'intégration et fonctionnels. Ici, il y a 15 tests unitaires pour 49 tests d'intégration et fonctionnels : cet objectif n'est pas atteint, mais tous les comportements de l'application sont testés.
+
 Branches de sujet fusionnées dans `main` :
 
 * `amelioration/dates-competitions-json`
@@ -171,5 +173,5 @@ Résultats (temps en millisecondes) :
 Conclusion : les seuils sont respectés (17 ms au maximum pour la liste et
 20 ms pour une mise à jour). Ces mesures portent sur un serveur de
 développement avec des données en mémoire et ne remplacent pas un test en
-production. Les rapports HTML et CSV existants dans `rapports/` sont
-conservés sans modification.
+production. Les rapports de ce test sont dans le dossier `rapports/`
+(`rapport_performance.html` et `rapport_performance_stats.csv`).
