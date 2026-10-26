@@ -1,0 +1,4 @@
+﻿Rapport Flake8 - projet GUDLFT - 2026-10-26
+Commande : python -m flake8 server.py tests --count --statistics
+0
+Resultat : 0 erreur (53 remarques avant correction)
