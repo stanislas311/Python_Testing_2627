@@ -125,26 +125,31 @@ Seuils demandés par les spécifications :
 * chargement de la liste des compétitions : moins de 5 secondes ;
 * mise à jour des points (réservation) : moins de 2 secondes.
 
-Commandes (le serveur Flask tourne dans un premier terminal) :
+Commande (le serveur Flask tourne dans un premier terminal). Les sorties
+Locust sont écrites dans `%TEMP%` pour conserver les rapports versionnés :
 
 ```
-flask --app server run
-locust -f tests/performance/locustfile.py --headless -u 20 -r 5 -t 20s --host http://127.0.0.1:5000 --html rapports/rapport_performance.html --csv rapports/rapport_performance
+$rapportTemp = Join-Path $env:TEMP 'gudlft-locust-step4'
+New-Item -ItemType Directory -Path $rapportTemp -Force | Out-Null
+locust -f tests/performance/locustfile.py --headless -u 6 -r 2 -t 20s --host http://127.0.0.1:5000 --html (Join-Path $rapportTemp 'rapport_performance.html') --csv (Join-Path $rapportTemp 'rapport_performance')
 ```
 
-Conditions : 20 utilisateurs simultanés, 5 nouveaux utilisateurs par seconde, 20 secondes, serveur de développement Flask sur un poste Windows (Python 3.11.9).
+Conditions : 6 utilisateurs simultanés, 2 nouveaux utilisateurs par seconde,
+20 secondes, serveur de développement Flask sous Windows (Python 3.11.9).
 
 Résultats (temps en millisecondes) :
 
 | Requête | Nombre | Moyenne | 95 % | Maximum | Échecs |
 |---|---|---|---|---|---|
-| Liste des compétitions | 132 | 23 | 56 | 185 | 0 |
-| Page de réservation | 69 | 21 | 53 | 169 | 0 |
-| Tableau des points | 73 | 21 | 71 | 99 | 0 |
-| Mise à jour des points (réservation) | 33 | 15 | 30 | 37 | 0 |
-| Mise à jour des points (annulation) | 33 | 34 | 62 | 109 | 0 |
-| **Total** | **340** | **22** | **61** | **185** | **0** |
+| Liste des compétitions | 49 | 5,6 | 6 | 59 | 0 |
+| Page de réservation | 22 | 6,7 | 8 | 51 | 0 |
+| Tableau des points | 25 | 4,4 | 8 | 8 | 0 |
+| Mise à jour des points (réservation) | 10 | 5,4 | 16 | 16 | 0 |
+| Mise à jour des points (annulation) | 10 | 12,2 | 20 | 20 | 0 |
+| **Total** | **116** | **6,1** | **12** | **59** | **0** |
 
-Conclusion : les deux seuils sont respectés avec une très grande marge (185 ms au maximum pour la liste, 109 ms au maximum pour une mise à jour). Ces mesures portent sur un serveur de développement avec des données en mémoire, donc elles ne remplacent pas un test sur un vrai serveur de production.
-
-Les rapports complets sont dans le dossier `rapports/` (`rapport_performance.html` et les fichiers CSV).
+Conclusion : les seuils sont respectés (59 ms au maximum pour la liste et
+20 ms pour une mise à jour). Ces mesures portent sur un serveur de
+développement avec des données en mémoire et ne remplacent pas un test en
+production. Les rapports HTML et CSV existants dans `rapports/` sont
+conservés sans modification.
