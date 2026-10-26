@@ -94,4 +94,4 @@ Ce fichier liste, en langage simple, chaque problème trouvé dans l'application
 - 64 tests automatiques réussis : 15 unitaires, 47 d'intégration et 2 fonctionnels (cas normaux et cas d'erreur)
 - Couverture de `server.py` : 100 % (162 instructions sur 162 ; le minimum demandé était 60 %)
 - Flake8 : 0 remarque
-- Tests de performance Locust : 0 échec sur 116 requêtes, temps maximum de 59 ms (20 ms maximum pour les mises à jour ; seuils demandés : 5 s et 2 s)
+- Tests de performance Locust (6 utilisateurs) : 0 échec sur 123 requêtes, temps maximum de 23 ms (20 ms maximum pour les mises à jour ; seuils demandés : 5 s et 2 s)

@@ -148,13 +148,10 @@ Seuils demandés par les spécifications :
 * chargement de la liste des compétitions : moins de 5 secondes ;
 * mise à jour des points (réservation) : moins de 2 secondes.
 
-Commande (le serveur Flask tourne dans un premier terminal). Les sorties
-Locust sont écrites dans `%TEMP%` pour conserver les rapports versionnés :
+Commande (le serveur Flask tourne dans un premier terminal) :
 
 ```
-$rapportTemp = Join-Path $env:TEMP 'gudlft-locust-step4'
-New-Item -ItemType Directory -Path $rapportTemp -Force | Out-Null
-locust -f tests/performance/locustfile.py --headless -u 6 -r 2 -t 20s --host http://127.0.0.1:5000 --html (Join-Path $rapportTemp 'rapport_performance.html') --csv (Join-Path $rapportTemp 'rapport_performance')
+locust -f tests/performance/locustfile.py --headless -u 6 -r 2 -t 20s --host http://127.0.0.1:5000 --html rapports/rapport_performance.html --csv rapports/rapport_performance
 ```
 
 Conditions : 6 utilisateurs simultanés, 2 nouveaux utilisateurs par seconde,
@@ -162,16 +159,16 @@ Conditions : 6 utilisateurs simultanés, 2 nouveaux utilisateurs par seconde,
 
 Résultats (temps en millisecondes) :
 
-| Requête | Nombre | Moyenne | 95 % | Maximum | Échecs |
+| Requête | Nombre | Moyenne (ms) | 95 % (ms) | Maximum (ms) | Échecs |
 |---|---|---|---|---|---|
-| Liste des compétitions | 49 | 5,6 | 6 | 59 | 0 |
-| Page de réservation | 22 | 6,7 | 8 | 51 | 0 |
-| Tableau des points | 25 | 4,4 | 8 | 8 | 0 |
-| Mise à jour des points (réservation) | 10 | 5,4 | 16 | 16 | 0 |
-| Mise à jour des points (annulation) | 10 | 12,2 | 20 | 20 | 0 |
-| **Total** | **116** | **6,1** | **12** | **59** | **0** |
+| Liste des compétitions | 45 | 6 | 11 | 17 | 0 |
+| Page de réservation | 24 | 6 | 10 | 23 | 0 |
+| Tableau des points | 24 | 5 | 9 | 10 | 0 |
+| Mise à jour des points (réservation) | 15 | 6 | 10 | 10 | 0 |
+| Mise à jour des points (annulation) | 15 | 13 | 20 | 20 | 0 |
+| **Total** | **123** | **7** | **15** | **23** | **0** |
 
-Conclusion : les seuils sont respectés (59 ms au maximum pour la liste et
+Conclusion : les seuils sont respectés (17 ms au maximum pour la liste et
 20 ms pour une mise à jour). Ces mesures portent sur un serveur de
 développement avec des données en mémoire et ne remplacent pas un test en
 production. Les rapports HTML et CSV existants dans `rapports/` sont
