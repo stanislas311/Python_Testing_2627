@@ -101,8 +101,9 @@ Version utilisée : Flake8 7.4.1 (Python 3.11.9).
 
 Les tests sont rangés dans le dossier `tests/` :
 
-* `tests/unit` : chargement des données et fonction `is_past` (4 tests)
+* `tests/unit` : helpers purs, chargement des données et fonction `is_past` (15 tests)
 * `tests/integration` : connexion, réservation, règles métier, classement, recherche, historique et annulation, avec les cas normaux (happy paths) et les cas d'erreur (sad paths) (47 tests)
+* `tests/functional` : parcours complet de réservation et parcours d'erreur (2 tests)
 * `tests/conftest.py` : remet les données à zéro avant chaque test
 
 Commandes :
@@ -114,7 +115,29 @@ python -m coverage report
 python -m coverage html
 ```
 
-Résultats : **51 tests réussis**, couverture de `server.py` : **100 %** (159 lignes sur 159). Le rapport détaillé se génère dans `htmlcov/index.html`.
+Résultats : **64 tests réussis** (15 unitaires, 47 d'intégration et 2 fonctionnels), couverture de `server.py` : **100 %** (162 instructions sur 162). Le rapport détaillé se génère dans `htmlcov/index.html`.
+
+Branches de sujet fusionnées dans `main` :
+
+* `amelioration/dates-competitions-json`
+* `amelioration/gitignore-venv`
+* `amelioration/interface-css`
+* `amelioration/performance-locust`
+* `amelioration/refonte-design`
+* `amelioration/tests-et-couverture`
+* `amelioration/tests-fonctionnels`
+* `amelioration/tests-unitaires`
+* `bug/club-competition-introuvable`
+* `bug/competitions-passees`
+* `bug/depassement-places-disponibles`
+* `bug/email-inconnu-crash`
+* `bug/limite-12-places`
+* `bug/points-non-deduits`
+* `bug/saisie-places-invalide`
+* `feature/annulation-reservation`
+* `feature/historique-reservations`
+* `feature/recherche-competitions`
+* `feature/tableau-points-public`
 
 ## 8. Rapport de performance
 
