@@ -40,6 +40,31 @@ def is_past(competition):
     return date < datetime.now()
 
 
+def parse_places(value):
+    try:
+        return int(value)
+    except ValueError:
+        return 0
+
+
+def compute_ranking(clubs):
+    ranking = sorted(clubs, key=lambda c: int(c['points']), reverse=True)
+    rows = []
+    previousPoints = None
+    rank = 0
+    for position, club in enumerate(ranking, start=1):
+        points = int(club['points'])
+        if points != previousPoints:
+            rank = position
+            previousPoints = points
+        rows.append({
+            'rank': rank,
+            'name': club['name'],
+            'points': points,
+        })
+    return rows
+
+
 app.jinja_env.globals['is_past'] = is_past
 
 
@@ -94,10 +119,7 @@ def purchasePlaces():
     club = [c for c in clubs if c['name'] == clubName][0]
     if is_past(competition):
         return refuse(club, MSG_RESERVATION_TERMINEE)
-    try:
-        placesRequired = int(request.form.get('places', ''))
-    except ValueError:
-        placesRequired = 0
+    placesRequired = parse_places(request.form.get('places', ''))
     if placesRequired <= 0:
         return refuse(club, MSG_PLACES_INVALIDES)
     key = (competition['name'], club['name'])
@@ -123,16 +145,7 @@ def purchasePlaces():
 
 @app.route('/points')
 def points():
-    ranking = sorted(clubs, key=lambda c: int(c['points']), reverse=True)
-    rows = []
-    previousPoints = None
-    rank = 0
-    for position, c in enumerate(ranking, start=1):
-        if int(c['points']) != previousPoints:
-            rank = position
-            previousPoints = int(c['points'])
-        rows.append(
-            {'rank': rank, 'name': c['name'], 'points': int(c['points'])})
+    rows = compute_ranking(clubs)
     currentClub = request.args.get('club', '')
     return render_template('points.html', rows=rows, currentClub=currentClub)
 
@@ -194,10 +207,7 @@ def annulerReservation():
     if is_past(competition):
         flash(MSG_ANNULATION_TERMINEE)
         return redirect(backToList)
-    try:
-        placesToCancel = int(request.form.get('places', ''))
-    except ValueError:
-        placesToCancel = 0
+    placesToCancel = parse_places(request.form.get('places', ''))
     if placesToCancel <= 0:
         flash(MSG_PLACES_INVALIDES)
         return redirect(backToList)
