@@ -1,12 +1,14 @@
-bin
-include
-lib
-.Python
-.envrc
-__pycache__
+# Environnements virtuels
 venv/
+.venv/
+
+# Caches Python et outils de test
 __pycache__/
+*.py[cod]
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Fichiers système
 .DS_Store
+Thumbs.db
